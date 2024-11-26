@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 4
+names: ['Occupied', 'Person', 'Table', 'Unoccupied']
+
+roboflow:
+  workspace: dhairya-khania
+  project: bench-detection-cujan
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/dhairya-khania/bench-detection-cujan/dataset/1
