@@ -30,13 +30,16 @@
 
     {% if filename %}
     <div class="image-container">
-        <h2>Detection Result:</h2>
+        <h2>Uploaded Image:</h2>
         <!-- Show the uploaded image -->
         <img src="{{ filename }}" alt="Uploaded Image">
 
-        <h2>Result with Bounding Boxes:</h2>
-        <!-- Show the result image with bounding boxes -->
+        <h2>Detection Result:</h2>
+        <!-- Show the result image from YOLO output -->
         <img src="{{ result_image_url }}" alt="Detection Result">
+
+        <h3>Occupied Objects: {{ occupied_count }}</h3>
+        <h3>Unoccupied Objects: {{ empty_count }}</h3>
     </div>
     {% endif %}
 </body>
