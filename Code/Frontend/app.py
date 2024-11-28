@@ -17,8 +17,12 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
     if request.method == 'POST':
         # Check if the post request has the file part
         if 'file' not in request.files:
@@ -35,27 +39,38 @@ def index():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
             
-            # Run the YOLO model on the uploaded image
-            result_image, occupied_count, empty_count = detect_objects(filepath)
+            # Redirect to the result page with the uploaded file path
+            return redirect(url_for('result', filename=filename))
 
-            # Save the result image (with bounding boxes)
-            result_image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'result_' + filename)
-            cv2.imwrite(result_image_path, result_image)
-            result_image_url = 'static/uploads/' + 'result_' + filename
+    return render_template('upload.html')  # Render the file upload form
 
-            filepath = filepath.replace('\\', '/')
+@app.route('/result')
+def result():
+    filename = request.args.get('filename')
+    if filename:
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-            return render_template('index.html', 
-                                   filename=filepath, 
-                                   result_image_url=result_image_url,
-                                   occupied_count=occupied_count, 
-                                   empty_count=empty_count)
+        # Run the YOLO model on the uploaded image
+        result_image, occupied_count, empty_count = detect_objects(filepath)
 
-    return render_template('index.html', filename=None, occupied_count=0, empty_count=0)
+        # Save the result image (with bounding boxes)
+        result_image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'result_' + filename)
+        cv2.imwrite(result_image_path, result_image)
+        result_image_url = 'static/uploads/' + 'result_' + filename
+
+        # Return the result page with the predictions and annotated image
+        return render_template('result.html', 
+                               filename=filepath, 
+                               result_image_url=result_image_url,
+                               occupied_count=occupied_count, 
+                               empty_count=empty_count)
+    
+    return redirect(url_for('upload'))  # Redirect back to upload if no filename is provided
 
 def detect_objects(image_path, save=True, save_dir="static/uploads/"):
     # Read the image
     img = cv2.imread(image_path)
+    
     # Perform object detection with the YOLOv8 model
     results = model.predict(source=img)  # Running inference on the image
     
@@ -87,5 +102,5 @@ def detect_objects(image_path, save=True, save_dir="static/uploads/"):
 
     return annotated_image, occupied_count, empty_count
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
