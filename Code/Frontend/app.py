@@ -35,6 +35,7 @@ def upload():
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             filename = file.filename
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
