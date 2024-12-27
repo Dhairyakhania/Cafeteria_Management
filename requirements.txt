@@ -1,0 +1,6 @@
+Flask
+requests
+ultralytics
+numpy
+cv2
+gunicorn
